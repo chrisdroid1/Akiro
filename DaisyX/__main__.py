@@ -418,7 +418,7 @@ def DaisyX_about_callback(update, context):
         )
     elif query.data == "aboutmanu_credit":
         query.message.edit_text(
-            text=f"*{dispatcher.bot.first_name} Is the redisigned version of Kaela for the best performance.*"
+            text=f"*{dispatcher.bot.first_name}.*"
             f"\n\n Check [Group](https://t.me/kaelagrpsupport) + [Channel](https://t.me/kaelasupport)."
             f"\n\n{dispatcher.bot.first_name}'s source code was written by Mrkahno or Chris"
             f"\n\nIf Any Question About {dispatcher.bot.first_name}, \nLet Us Know At @{SUPPORT_CHAT}.",
