@@ -20,7 +20,7 @@ from pytgcalls import GroupCall
 
 from DaisyX.utils import db
 
-from misc2 import HELP_TEXT
+from DaisyX.utils import helper
 
 
 running = False  # Tells if the queue is running or not
