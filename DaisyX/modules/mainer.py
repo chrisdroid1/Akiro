@@ -19,7 +19,7 @@ from pyrogram.types import Message
 from pytgcalls import GroupCall
 
 from DaisyX.utils import db
-from 
+
 from misc2 import HELP_TEXT
 
 
