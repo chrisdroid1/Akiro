@@ -297,19 +297,23 @@ async def list_vc(_, message):
 
 __help__ = """
 *Vcplayer:*
-✪ Daisy can mute members who are not subscribed your channel until they subscribe
-✪ When enabled I will mute unsubscribed members and show them a unmute button. When they pressed the button I will unmute them
+✪ Daisy Has the voice chat function 
 *Setup*
-1) First of all add me in the group as admin with ban users permission and in the channel as admin.
-Note: Only creator of the group can setup me and i will not allow force subscribe again if not done so.
+1) First of all add me in the group as admin with manage voice chat permission and in the channel as admin.
+
  
 *Commmands*
-✪ /ForceSubscribe - To get the current settings.
-✪ /ForceSubscribe no/off/disable - To turn of ForceSubscribe.
-✪ /ForceSubscribe {channel username} - To turn on and setup the channel.
-✪ /ForceSubscribe clear - To unmute all members who muted by me.
-Note: /FSub is an alias of /ForceSubscribe
- 
+__**I Can Play Music In The Voice Chat**__
+**/skip** __Skip The Current Playing Music.__
+**/play** __youtube/saavn/deezer Song_Name__
+**/telegram** __Play From Telegram Audio.__
+**/joinvc** __Join Voice Chat.__
+**/leavevc** __Leave Voice Chat.__
+**/listvc** __List Joined Voice Chats.__
+**/volume [1-200]** __Adjust Volume.__
+**/pause** __Pause Music.__
+**/resume** __Resume Music.__
+**/theme** __Change Curently Playing Theme.__
+**/update** __Update & Restart.__ 
 """
 __mod_name__ = "🤨 Vc player 💭"
-
