@@ -19,8 +19,7 @@ from pyrogram.types import Message
 from pytgcalls import GroupCall
 
 from DaisyX.utils import db
-from functions import (change_theme, deezer, , saavn, 
-                       transcode, youtube, app)
+from 
 from misc2 import HELP_TEXT
 
 
