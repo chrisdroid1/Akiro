@@ -1,7 +1,7 @@
 # Create a new config.py or rename this to config.py file in same dir and import, then extend this class.
 import json
 import os
-
+from dotenv import load_dotenv
 
 def get_user_list(config, key):
     with open("{}/DaisyX/{}".format(os.getcwd(), config), "r") as json_file:
@@ -18,6 +18,8 @@ class Config(object):
     API_HASH = "awoo"
     TOKEN = "BOT_TOKEN"  # This var used to be API_KEY but it is now TOKEN, adjust accordingly.
     OWNER_ID = 792109647  # If you dont know, run the bot and do /id in your private chat with it, also an integer
+    SESSION_STRING = environ["SESSION_STRING"]  # Check Readme for session
+    ARQ_API_KEY = environ["ARQ_API_KEY"]
     OWNER_USERNAME = "Sawada"
     SUPPORT_CHAT = "OnePunchSupport"  # Your own group for support, do not add the @
     JOIN_LOGGER = (
@@ -68,6 +70,9 @@ class Config(object):
     AI_API_KEY = "awoo"  # For chatbot, get one from https://coffeehouse.intellivoid.net/dashboard
     BL_CHATS = []  # List of groups that you want blacklisted.
     SPAMMERS = None
+
+  # don't make changes below this line
+  ARQ_API = "https://thearq.tech"
 
 
 class Production(Config):
