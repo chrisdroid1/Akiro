@@ -21,7 +21,7 @@ from pytgcalls import GroupCall
 from db import db
 from functions import (change_theme, deezer, get_theme, saavn, themes,
                        transcode, youtube, app)
-from misc import HELP_TEXT, REPO_TEXT
+from misc2 import HELP_TEXT
 
 
 running = False  # Tells if the queue is running or not
