@@ -8,7 +8,7 @@ import traceback
 from sys import version as pyver
 
 # Initialize db
-import db
+from DaisyX.utils import db
 db.init()
 
 from pyrogram import filters, idle
