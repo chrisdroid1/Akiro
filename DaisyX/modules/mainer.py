@@ -18,7 +18,7 @@ from pyrogram.raw.types import InputPeerChannel
 from pyrogram.types import Message
 from pytgcalls import GroupCall
 
-from db import db
+from DaisyX.utils import db
 from functions import (change_theme, deezer, get_theme, saavn, themes,
                        transcode, youtube, app)
 from misc2 import HELP_TEXT
