@@ -54,4 +54,7 @@ google-api-python-client
 wget
 fake-useragent
 asyncio
-py-tgcalls
+pytgcalls
+ffmpeg-python
+python-arq
+python-dotenv
