@@ -5,6 +5,7 @@ import functools
 import os
 import subprocess
 import traceback
+from DaisyX import pbot
 from sys import version as pyver
 
 # Initialize db
