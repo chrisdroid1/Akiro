@@ -21,15 +21,8 @@ from pytgcalls import GroupCall
 
 from DaisyX.utils import db
 
-from DaisyX.utils import helper
-
 
 running = False  # Tells if the queue is running or not
-
-
-@pbot.on_message(filters.command("vchelp") & ~filters.private)
-async def help(_, message):
-    await message.reply_text(HELP_TEXT, quote=False)
 
 
 
@@ -300,3 +293,23 @@ async def list_vc(_, message):
             chat_title = "Private"
         text += f"**{count}.** [`{chat_id}`]  **{chat_title}**\n"
     await message.reply_text(text)
+
+
+__help__ = """
+*Vcplayer:*
+✪ Daisy can mute members who are not subscribed your channel until they subscribe
+✪ When enabled I will mute unsubscribed members and show them a unmute button. When they pressed the button I will unmute them
+*Setup*
+1) First of all add me in the group as admin with ban users permission and in the channel as admin.
+Note: Only creator of the group can setup me and i will not allow force subscribe again if not done so.
+ 
+*Commmands*
+✪ /ForceSubscribe - To get the current settings.
+✪ /ForceSubscribe no/off/disable - To turn of ForceSubscribe.
+✪ /ForceSubscribe {channel username} - To turn on and setup the channel.
+✪ /ForceSubscribe clear - To unmute all members who muted by me.
+Note: /FSub is an alias of /ForceSubscribe
+ 
+"""
+__mod_name__ = "🤨 Vc player 💭"
+
