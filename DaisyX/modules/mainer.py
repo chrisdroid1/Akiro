@@ -19,7 +19,7 @@ from pyrogram.types import Message
 from pytgcalls import GroupCall
 
 from DaisyX.utils import db
-from functions import (change_theme, deezer, get_theme, saavn, themes,
+from functions import (change_theme, deezer, , saavn, 
                        transcode, youtube, app)
 from misc2 import HELP_TEXT
 
@@ -31,22 +31,6 @@ running = False  # Tells if the queue is running or not
 async def help(_, message):
     await message.reply_text(HELP_TEXT, quote=False)
 
-
-@pbot.on_message(filters.command("repo") & ~filters.private)
-async def repo(_, message):
-    await message.reply_text(REPO_TEXT, quote=False)
-
-
-@pbot.on_message(filters.command("theme") & ~filters.private)
-async def theme_func(_, message):
-    usage = f"Wrong theme, select one from below\n{' | '.join(themes)}"
-    if len(message.command) != 2:
-        return await message.reply_text(usage)
-    theme = message.text.split(None, 1)[1].strip()
-    if theme not in themes:
-        return await message.reply_text(usage)
-    change_theme(theme, message.chat.id)
-    await message.reply_text(f"Changed theme to {theme}")
 
 
 @pbot.on_message(filters.command("joinvc") & ~filters.private)
