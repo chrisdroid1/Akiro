@@ -61,6 +61,13 @@ RUN apt update && apt upgrade -y && \
     libopus-dev \
     && rm -rf /var/lib/apt/lists /var/cache/apt/archives /tmp
 
+#Installing Requirements
+RUN apt-get install -y ffmpeg python3-pip opus-tools
+
+#Updating pip
+RUN python3.9 -m pip install -U pip
+
+
 # Pypi package Repo upgrade
 RUN pip3 install --upgrade pip setuptools
 
