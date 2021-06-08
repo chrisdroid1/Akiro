@@ -5,7 +5,7 @@ from PIL import Image
 from telegraph import Telegraph, exceptions, upload_file
 from telethon import events
 
-from DaisyX import pbot as borg
+from DaisyX import pbot
 
 telegraph = Telegraph()
 r = telegraph.create_account(short_name="Akiro")
@@ -17,7 +17,7 @@ TMP_DOWNLOAD_DIRECTORY = "./"
 BOTLOG = False
 
 
-@borg.on(events.NewMessage(pattern="/telegraph (media|text) ?(.*)"))
+@pbot.on(events.NewMessage(pattern="/telegraph (media|text) ?(.*)"))
 async def _(event):
     if event.fwd_from:
         return
