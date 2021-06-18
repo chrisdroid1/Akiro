@@ -7,6 +7,7 @@ emoji
 lxml
 beautifulsoup4
 requests
+dnspython
 sqlalchemy==1.3.20
 python-telegram-bot==12.8
 psycopg2-binary==2.8.6
