@@ -1,4 +1,8 @@
 future
+
+#googletrans
+google_trans_new
+
 emoji
 lxml
 beautifulsoup4
