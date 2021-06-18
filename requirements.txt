@@ -52,5 +52,16 @@ validators
 bing_image_downloader
 google-api-python-client
 wget
+envparse
+pymongo==3.11.0
+
+#profanity (Credits to Julia)
+better_profanity
+textblob 
+nudepy
+
+motor
+cloudscraper
+
 fake-useragent
 asyncio
