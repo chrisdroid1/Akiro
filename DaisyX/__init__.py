@@ -69,6 +69,7 @@ if ENV:
     API_ID = os.environ.get("API_ID", None)
     BOT_ID = int(os.environ.get("BOT_ID", None))
     API_HASH = os.environ.get("API_HASH", None)
+    MONGO_DB_URI = os.environ.get("MONGO_DB_URI", None)
     DB_URI = os.environ.get("DATABASE_URL")
     DONATION_LINK = os.environ.get("DONATION_LINK")
     LOAD = os.environ.get("LOAD", "").split()
@@ -158,6 +159,7 @@ else:
     CASH_API_KEY = Config.CASH_API_KEY
     TIME_API_KEY = Config.TIME_API_KEY
     AI_API_KEY = Config.AI_API_KEY
+    MONGO_DB_URI = Config.MONGO_DB_URI
     WALL_API = Config.WALL_API
     BOT_ID = Config.BOT_ID
     SUPPORT_CHAT = Config.SUPPORT_CHAT
