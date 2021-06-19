@@ -67,6 +67,6 @@ nudepy
 
 motor
 cloudscraper
-
 fake-useragent
 asyncio
+pymongo[srv]
