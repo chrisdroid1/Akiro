@@ -1,36 +1,36 @@
-import ast
-import random
-import re
+import re, ast
 from io import BytesIO
+import random
 from typing import Optional
 
+import DaisyX.modules.sql.notes_sql as sql
+from DaisyX import LOGGER, JOIN_LOGGER, SUPPORT_CHAT, dispatcher, DRAGONS
+from DaisyX.modules.disable import DisableAbleCommandHandler
+from DaisyX.modules.helper_funcs.handlers import MessageHandlerChecker
+from DaisyX.modules.helper_funcs.chat_status import user_admin, connection_status
+from DaisyX.modules.helper_funcs.misc import build_keyboard, revert_buttons
+from DaisyX.modules.helper_funcs.msg_types import get_note_type
+from DaisyX.modules.helper_funcs.string_handling import (
+    escape_invalid_curly_brackets,
+)
 from telegram import (
     MAX_MESSAGE_LENGTH,
-    InlineKeyboardButton,
     InlineKeyboardMarkup,
     Message,
     ParseMode,
     Update,
+    InlineKeyboardButton,
 )
 from telegram.error import BadRequest
+from telegram.utils.helpers import escape_markdown, mention_markdown
 from telegram.ext import (
     CallbackContext,
-    CallbackQueryHandler,
     CommandHandler,
+    CallbackQueryHandler,
     Filters,
     MessageHandler,
 )
 from telegram.ext.dispatcher import run_async
-from telegram.utils.helpers import escape_markdown, mention_markdown
-
-import DaisyX.modules.sql.notes_sql as sql
-from DaisyX import DRAGONS, JOIN_LOGGER, LOGGER, SUPPORT_CHAT, dispatcher
-from DaisyX.modules.disable import DisableAbleCommandHandler
-from DaisyX.modules.helper_funcs.chat_status import connection_status, user_admin
-from DaisyX.modules.helper_funcs.handlers import MessageHandlerChecker
-from DaisyX.modules.helper_funcs.misc import build_keyboard, revert_buttons
-from DaisyX.modules.helper_funcs.msg_types import get_note_type
-from DaisyX.modules.helper_funcs.string_handling import escape_invalid_curly_brackets
 
 FILE_MATCHER = re.compile(r"^###file_id(!photo)?###:(.*?)(?:\s|$)")
 STICKER_MATCHER = re.compile(r"^###sticker(!photo)?###:")
@@ -516,18 +516,18 @@ def __chat_settings__(chat_id, user_id):
 
 
 __help__ = """
- ✪ /get <notename>*:* get the note with this notename
- ✪ #<notename>*:* same as /get
- ✪ /notes or /saved*:* list all saved notes in this chat
- ✪ /number *:* Will pull the note of that number in the list
+ ❍ /get <notename>*:* get the note with this notename
+ ❍ #<notename>*:* same as /get
+ ❍ /notes or /saved*:* list all saved notes in this chat
+ ❍ /number *:* Will pull the note of that number in the list
 If you would like to retrieve the contents of a note without any formatting, use `/get <notename> noformat`. This can \
 be useful when updating a current note
 
 *Admins only:*
- ✪ /save <notename> <notedata>*:* saves notedata as a note with name notename
+ ❍ /save <notename> <notedata>*:* saves notedata as a note with name notename
 A button can be added to a note by using standard markdown link syntax - the link should just be prepended with a \
 `buttonurl:` section, as such: `[somelink](buttonurl:example.com)`. Check `/markdownhelp` for more info
- ✪ /save <notename>*:* save the replied message as a note with name notename
+ ❍ /save <notename>*:* save the replied message as a note with name notename
  Separate diff replies by `%%%` to get random notes
  *Example:* 
  `/save notename
@@ -536,13 +536,13 @@ A button can be added to a note by using standard markdown link syntax - the lin
  Reply 2
  %%%
  Reply 3`
- ✪ /clear <notename>*:* clear note with this name
- ✪ /removeallnotes*:* removes all notes from the group
+ ❍ /clear <notename>*:* clear note with this name
+ ❍ /removeallnotes*:* removes all notes from the group
  *Note:* Note names are case-insensitive, and they are automatically converted to lowercase before getting saved.
 
 """
 
-__mod_name__ = "Notes ✍️"
+__mod_name__ = "Notes"
 
 GET_HANDLER = CommandHandler("get", cmd_get)
 HASH_GET_HANDLER = MessageHandler(Filters.regex(r"^#[^\s]+"), hash_get)
