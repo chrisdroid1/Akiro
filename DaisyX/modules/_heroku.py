@@ -211,3 +211,8 @@ def prettyjson(obj, indent=2, maxlinelength=80):
         indent=indent,
     )
     return indentitems(items, indent, level=0)
+  
+
+  __help__= “devs only”
+
+__mod_name__= “devsonly”
