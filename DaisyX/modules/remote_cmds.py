@@ -1,7 +1,3 @@
-from telegram import ChatPermissions, Update
-from telegram.error import BadRequest
-from telegram.ext import CallbackContext, CommandHandler, run_async
-
 from DaisyX import dispatcher
 from DaisyX.modules.helper_funcs.chat_status import (
     bot_admin,
@@ -11,6 +7,9 @@ from DaisyX.modules.helper_funcs.chat_status import (
 )
 from DaisyX.modules.helper_funcs.extraction import extract_user_and_text
 from DaisyX.modules.helper_funcs.filters import CustomFilters
+from telegram import Update, ChatPermissions
+from telegram.error import BadRequest
+from telegram.ext import CallbackContext, CommandHandler, run_async
 
 RBAN_ERRORS = {
     "User is an administrator of the chat",
@@ -19,7 +18,7 @@ RBAN_ERRORS = {
     "User_not_participant",
     "Peer_id_invalid",
     "Group chat was deactivated",
-    "Need to be inviter of a user to kick it from a basic group",
+    "Need to be inviter of a user to punch it from a basic group",
     "Chat_admin_required",
     "Only the creator of a basic group can punch group administrators",
     "Channel_private",
@@ -212,7 +211,7 @@ def runban(update: Update, context: CallbackContext):
         return
 
     try:
-        chat.get_member(user_id)
+        member = chat.get_member(user_id)
     except BadRequest as excp:
         if excp.message == "User not found":
             message.reply_text("I can't seem to find this user there")
