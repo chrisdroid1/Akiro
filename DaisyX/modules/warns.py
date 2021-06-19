@@ -3,6 +3,27 @@ import re
 from typing import Optional
 
 import telegram
+from DaisyX import TIGERS, WOLVES, dispatcher
+from DaisyX.modules.disable import DisableAbleCommandHandler
+from DaisyX.modules.helper_funcs.chat_status import (
+    bot_admin,
+    can_restrict,
+    is_user_admin,
+    user_admin,
+    user_can_ban,
+    user_admin_no_reply,
+    can_delete,
+)
+from DaisyX.modules.helper_funcs.extraction import (
+    extract_text,
+    extract_user,
+    extract_user_and_text,
+)
+from DaisyX.modules.helper_funcs.filters import CustomFilters
+from DaisyX.modules.helper_funcs.misc import split_message
+from DaisyX.modules.helper_funcs.string_handling import split_quotes
+from DaisyX.modules.log_channel import loggable
+from DaisyX.modules.sql import warns_sql as sql
 from telegram import (
     CallbackQuery,
     Chat,
@@ -24,35 +45,18 @@ from telegram.ext import (
     run_async,
 )
 from telegram.utils.helpers import mention_html
-
-from DaisyX import TIGERS, WOLVES, dispatcher
-from DaisyX.modules.disable import DisableAbleCommandHandler
-from DaisyX.modules.helper_funcs.chat_status import (
-    bot_admin,
-    can_restrict,
-    is_user_admin,
-    user_admin,
-    user_admin_no_reply,
-)
-from DaisyX.modules.helper_funcs.extraction import (
-    extract_text,
-    extract_user,
-    extract_user_and_text,
-)
-from DaisyX.modules.helper_funcs.filters import CustomFilters
-from DaisyX.modules.helper_funcs.misc import split_message
-from DaisyX.modules.helper_funcs.string_handling import split_quotes
-from DaisyX.modules.log_channel import loggable
-from DaisyX.modules.sql import warns_sql as sql
+from DaisyX.modules.sql.approve_sql import is_approved
 
 WARN_HANDLER_GROUP = 9
 CURRENT_WARNING_FILTER_STRING = "<b>Current warning filters in this chat:</b>\n"
 
 
 # Not async
-def warn(
-    user: User, chat: Chat, reason: str, message: Message, warner: User = None
-) -> str:
+def warn(user: User,
+         chat: Chat,
+         reason: str,
+         message: Message,
+         warner: User = None) -> str:
     if is_user_admin(chat, user.id):
         # message.reply_text("Damn admins, They are too far to be One Punched!")
         return
@@ -89,74 +93,67 @@ def warn(
             reply = (
                 f"<code>❕</code><b>Punch Event</b>\n"
                 f"<code> </code><b>•  User:</b> {mention_html(user.id, user.first_name)}\n"
-                f"<code> </code><b>•  Count:</b> {limit}"
-            )
+                f"<code> </code><b>•  Count:</b> {limit}")
 
         else:  # ban
             chat.kick_member(user.id)
             reply = (
                 f"<code>❕</code><b>Ban Event</b>\n"
                 f"<code> </code><b>•  User:</b> {mention_html(user.id, user.first_name)}\n"
-                f"<code> </code><b>•  Count:</b> {limit}"
-            )
+                f"<code> </code><b>•  Count:</b> {limit}")
 
         for warn_reason in reasons:
             reply += f"\n - {html.escape(warn_reason)}"
 
         # message.bot.send_sticker(chat.id, BAN_STICKER)  # Saitama's sticker
         keyboard = None
-        log_reason = (
-            f"<b>{html.escape(chat.title)}:</b>\n"
-            f"#WARN_BAN\n"
-            f"<b>Admin:</b> {warner_tag}\n"
-            f"<b>User:</b> {mention_html(user.id, user.first_name)}\n"
-            f"<b>Reason:</b> {reason}\n"
-            f"<b>Counts:</b> <code>{num_warns}/{limit}</code>"
-        )
+        log_reason = (f"<b>{html.escape(chat.title)}:</b>\n"
+                      f"#WARN_BAN\n"
+                      f"<b>Admin:</b> {warner_tag}\n"
+                      f"<b>User:</b> {mention_html(user.id, user.first_name)}\n"
+                      f"<b>Reason:</b> {reason}\n"
+                      f"<b>Counts:</b> <code>{num_warns}/{limit}</code>")
 
     else:
-        keyboard = InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton(
-                        "🔘 Remove warn", callback_data="rm_warn({})".format(user.id)
-                    )
-                ]
-            ]
-        )
+        keyboard = InlineKeyboardMarkup([[
+            InlineKeyboardButton(
+                "🔘 Remove warn", callback_data="rm_warn({})".format(user.id))
+        ]])
 
         reply = (
             f"<code>❕</code><b>Warn Event</b>\n"
             f"<code> </code><b>•  User:</b> {mention_html(user.id, user.first_name)}\n"
-            f"<code> </code><b>•  Count:</b> {num_warns}/{limit}"
-        )
+            f"<code> </code><b>•  Count:</b> {num_warns}/{limit}")
         if reason:
             reply += f"\n<code> </code><b>•  Reason:</b> {html.escape(reason)}"
 
-        log_reason = (
-            f"<b>{html.escape(chat.title)}:</b>\n"
-            f"#WARN\n"
-            f"<b>Admin:</b> {warner_tag}\n"
-            f"<b>User:</b> {mention_html(user.id, user.first_name)}\n"
-            f"<b>Reason:</b> {reason}\n"
-            f"<b>Counts:</b> <code>{num_warns}/{limit}</code>"
-        )
+        log_reason = (f"<b>{html.escape(chat.title)}:</b>\n"
+                      f"#WARN\n"
+                      f"<b>Admin:</b> {warner_tag}\n"
+                      f"<b>User:</b> {mention_html(user.id, user.first_name)}\n"
+                      f"<b>Reason:</b> {reason}\n"
+                      f"<b>Counts:</b> <code>{num_warns}/{limit}</code>")
 
     try:
-        message.reply_text(reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+        message.reply_text(
+            reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
     except BadRequest as excp:
         if excp.message == "Reply message not found":
             # Do not reply
             message.reply_text(
-                reply, reply_markup=keyboard, parse_mode=ParseMode.HTML, quote=False
-            )
+                reply,
+                reply_markup=keyboard,
+                parse_mode=ParseMode.HTML,
+                quote=False)
         else:
             raise
     return log_reason
 
 
+
 @run_async
 @user_admin_no_reply
+# @user_can_ban
 @bot_admin
 @loggable
 def button(update: Update, context: CallbackContext) -> str:
@@ -190,6 +187,7 @@ def button(update: Update, context: CallbackContext) -> str:
 @run_async
 @user_admin
 @can_restrict
+# @user_can_ban
 @loggable
 def warn_user(update: Update, context: CallbackContext) -> str:
     args = context.args
@@ -198,7 +196,8 @@ def warn_user(update: Update, context: CallbackContext) -> str:
     warner: Optional[User] = update.effective_user
 
     user_id, reason = extract_user_and_text(message, args)
-
+    if message.text.startswith("/d") and message.reply_to_message:
+        message.reply_to_message.delete()
     if user_id:
         if (
             message.reply_to_message
@@ -220,6 +219,7 @@ def warn_user(update: Update, context: CallbackContext) -> str:
 
 @run_async
 @user_admin
+# @user_can_ban
 @bot_admin
 @loggable
 def reset_warns(update: Update, context: CallbackContext) -> str:
@@ -277,6 +277,7 @@ def warns(update: Update, context: CallbackContext):
 
 # Dispatcher handler stop - do not async
 @user_admin
+# @user_can_ban
 def add_warn_filter(update: Update, context: CallbackContext):
     chat: Optional[Chat] = update.effective_chat
     msg: Optional[Message] = update.effective_message
@@ -310,6 +311,7 @@ def add_warn_filter(update: Update, context: CallbackContext):
 
 
 @user_admin
+# @user_can_ban
 def remove_warn_filter(update: Update, context: CallbackContext):
     chat: Optional[Chat] = update.effective_chat
     msg: Optional[Message] = update.effective_message
@@ -379,7 +381,8 @@ def reply_filter(update: Update, context: CallbackContext) -> str:
 
     if user.id == 777000:
         return
-
+    if is_approved(chat.id, user.id):
+        return
     chat_warn_filters = sql.get_chat_warn_triggers(chat.id)
     to_match = extract_text(message)
     if not to_match:
@@ -396,6 +399,7 @@ def reply_filter(update: Update, context: CallbackContext) -> str:
 
 @run_async
 @user_admin
+# @user_can_ban
 @loggable
 def set_warn_limit(update: Update, context: CallbackContext) -> str:
     args = context.args
@@ -427,6 +431,7 @@ def set_warn_limit(update: Update, context: CallbackContext) -> str:
 
 @run_async
 @user_admin
+# @user_can_ban
 def set_warn_strength(update: Update, context: CallbackContext):
     args = context.args
     chat: Optional[Chat] = update.effective_chat
@@ -498,22 +503,22 @@ def __chat_settings__(chat_id, user_id):
 
 
 __help__ = """
- ✪ /warns <userhandle>*:* get a user's number, and reason, of warns.
- ✪ /warnlist*:* list of all current warning filters
-
+ ❍ /warns <userhandle>*:* get a user's number, and reason, of warns.
+ ❍ /warnlist*:* list of all current warning filters
 *Admins only:*
- ✪ /warn <userhandle>*:* warn a user. After 3 warns, the user will be banned from the group. Can also be used as a reply.
- ✪ /resetwarn <userhandle>*:* reset the warns for a user. Can also be used as a reply.
- ✪ /addwarn <keyword> <reply message>*:* set a warning filter on a certain keyword. If you want your keyword to \
-be a sentence, encompass it with quotes, as such: `/addwarn "very angry" This is an angry user`. 
- ✪ /nowarn <keyword>*:* stop a warning filter
- ✪ /warnlimit <num>*:* set the warning limit
- ✪ /strongwarn <on/yes/off/no>*:* If set to on, exceeding the warn limit will result in a ban. Else, will just punch.
+ ❍ /warn <userhandle>*:* warn a user. After 3 warns, the user will be banned from the group. Can also be used as a reply.
+ ❍ /dwarn <userhandle>*:* warn a user and delete the message. After 3 warns, the user will be banned from the group. Can also be used as a reply.
+ ❍ /resetwarn <userhandle>*:* reset the warns for a user. Can also be used as a reply.
+ ❍ /addwarn <keyword> <reply message>*:* set a warning filter on a certain keyword. If you want your keyword to \
+be a sentence, encompass it with quotes, as such: `/addwarn "very angry" This is an angry user`.
+ ❍ /nowarn <keyword>*:* stop a warning filter
+ ❍ /warnlimit <num>*:* set the warning limit
+ ❍ /strongwarn <on/yes/off/no>*:* If set to on, exceeding the warn limit will result in a ban. Else, will just punch.
 """
 
-__mod_name__ = "Warnings ❗️"
+__mod_name__ = "Warns"
 
-WARN_HANDLER = CommandHandler("warn", warn_user, filters=Filters.group)
+WARN_HANDLER = CommandHandler(["warn", "dwarn"], warn_user, filters=Filters.group)
 RESET_WARN_HANDLER = CommandHandler(
     ["resetwarn", "resetwarns"], reset_warns, filters=Filters.group
 )
