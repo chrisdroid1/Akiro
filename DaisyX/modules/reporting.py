@@ -1,5 +1,9 @@
 import html
 
+from DaisyX import LOGGER, DRAGONS, TIGERS, WOLVES, dispatcher
+from DaisyX.modules.helper_funcs.chat_status import user_admin, user_not_admin
+from DaisyX.modules.log_channel import loggable
+from DaisyX.modules.sql import reporting_sql as sql
 from telegram import Chat, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, Update
 from telegram.error import BadRequest, Unauthorized
 from telegram.ext import (
@@ -11,11 +15,6 @@ from telegram.ext import (
     run_async,
 )
 from telegram.utils.helpers import mention_html
-
-from DaisyX import DRAGONS, LOGGER, TIGERS, WOLVES, dispatcher
-from DaisyX.modules.helper_funcs.chat_status import user_admin, user_not_admin
-from DaisyX.modules.log_channel import loggable
-from DaisyX.modules.sql import reporting_sql as sql
 
 REPORT_GROUP = 12
 REPORT_IMMUNE_USERS = DRAGONS + TIGERS + WOLVES
@@ -232,7 +231,7 @@ def buttons(update: Update, context: CallbackContext):
             query.answer("✅ Succesfully kicked")
             return ""
         except Exception as err:
-            query.answer("🛑 Failed to Kick")
+            query.answer("🛑 Failed to Punch")
             bot.sendMessage(
                 text=f"Error: {err}",
                 chat_id=query.message.chat_id,
@@ -265,12 +264,12 @@ def buttons(update: Update, context: CallbackContext):
 
 
 __help__ = """
-✪ /report <reason>*:* reply to a message to report it to admins.
-✪ `@admin`*:* reply to a message to report it to admins.
+ ❍ /report <reason>*:* reply to a message to report it to admins.
+ ❍ @admin*:* reply to a message to report it to admins.
 *NOTE:* Neither of these will get triggered if used by admins.
 
 *Admins only:*
- ✪ /reports <on/off>*:* change report setting, or view current status.
+ ❍ /reports <on/off>*:* change report setting, or view current status.
    • If done in pm, toggles your status.
    • If in group, toggles that groups's status.
 """
@@ -286,7 +285,7 @@ dispatcher.add_handler(SETTING_HANDLER)
 dispatcher.add_handler(REPORT_HANDLER, REPORT_GROUP)
 dispatcher.add_handler(ADMIN_REPORT_HANDLER, REPORT_GROUP)
 
-__mod_name__ = "Reporting ⚠️"
+__mod_name__ = "Reports"
 __handlers__ = [
     (REPORT_HANDLER, REPORT_GROUP),
     (ADMIN_REPORT_HANDLER, REPORT_GROUP),
