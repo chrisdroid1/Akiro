@@ -1,6 +1,6 @@
 from DaisyX.events import register
 from DaisyX import telethn as tbot
-TMP_DOWNLOAD_DIRECTORY = "./"
+TEMP_DOWNLOAD_DIRECTORY = "./"
 from telethon import events
 import os
 from PIL import Image
@@ -24,7 +24,7 @@ async def _(event):
         if input_str == "m":
             downloaded_file_name = await tbot.download_media(
                 r_message,
-                TMP_DOWNLOAD_DIRECTORY
+                TEMP_DOWNLOAD_DIRECTORY
             )
             end = datetime.now()
             ms = (end - start).seconds
@@ -54,7 +54,7 @@ async def _(event):
                     title_of_page = page_content
                 downloaded_file_name = await tbot.download_media(
                     r_message,
-                    TMP_DOWNLOAD_DIRECTORY
+                    TEMP_DOWNLOAD_DIRECTORY
                 )
                 m_list = None
                 with open(downloaded_file_name, "rb") as fd:
