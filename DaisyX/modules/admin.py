@@ -7,17 +7,27 @@ from telegram.utils.helpers import mention_html
 
 from DaisyX import DRAGONS, dispatcher
 from DaisyX.modules.disable import DisableAbleCommandHandler
-from DaisyX.modules.helper_funcs.alternate import send_message
 from DaisyX.modules.helper_funcs.chat_status import (
-    ADMIN_CACHE,
     bot_admin,
     can_pin,
     can_promote,
     connection_status,
     user_admin,
+    ADMIN_CACHE,
 )
-from DaisyX.modules.helper_funcs.extraction import extract_user, extract_user_and_text
+from DaisyX.helper_extra.admin_rights import (
+    user_can_pin,
+    user_can_promote,
+    user_can_changeinfo,
+)
+
+from DaisyX.modules.helper_funcs.extraction import (
+    extract_user,
+    extract_user_and_text,
+)
 from DaisyX.modules.log_channel import loggable
+from DaisyX.modules.helper_funcs.alternate import send_message
+from DaisyX.modules.helper_funcs.alternate import typing_action
 
 
 @run_async
@@ -38,7 +48,7 @@ def promote(update: Update, context: CallbackContext) -> str:
 
     if (
         not (promoter.can_promote_members or promoter.status == "creator")
-        and not user.id in DRAGONS
+        and user.id not in DRAGONS
     ):
         message.reply_text("You don't have the necessary rights to do that!")
         return
@@ -95,7 +105,7 @@ def promote(update: Update, context: CallbackContext) -> str:
 
     log_message = (
         f"<b>{html.escape(chat.title)}:</b>\n"
-        f"#PROMOTED\n"
+        f"USER PROMOTED SUCCESSFULLY\n"
         f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
         f"<b>User:</b> {mention_html(user_member.user.id, user_member.user.first_name)}"
     )
@@ -118,6 +128,11 @@ def demote(update: Update, context: CallbackContext) -> str:
     user = update.effective_user
 
     user_id = extract_user(message, args)
+
+    if user_can_promote(chat, user, context.bot.id) is False:
+        message.reply_text("You don't have enough rights to demote someone!")
+        return ""
+
     if not user_id:
         message.reply_text(
             "You don't seem to be referring to a user or the ID specified is incorrect.."
@@ -163,7 +178,7 @@ def demote(update: Update, context: CallbackContext) -> str:
 
         log_message = (
             f"<b>{html.escape(chat.title)}:</b>\n"
-            f"#DEMOTED\n"
+            f"USER DEMOTED SUCCESSFULLY\n"
             f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
             f"<b>User:</b> {mention_html(user_member.user.id, user_member.user.first_name)}"
         )
@@ -218,7 +233,7 @@ def set_title(update: Update, context: CallbackContext):
         )
         return
 
-    if not user_member.status == "administrator":
+    if user_member.status != "administrator":
         message.reply_text(
             "Can't set title for non-admins!\nPromote them first to set custom title!"
         )
@@ -255,6 +270,162 @@ def set_title(update: Update, context: CallbackContext):
 
 @run_async
 @bot_admin
+@user_admin
+@typing_action
+def setchatpic(update, context):
+    chat = update.effective_chat
+    msg = update.effective_message
+    user = update.effective_user
+
+    if user_can_changeinfo(chat, user, context.bot.id) is False:
+        msg.reply_text("You are missing right to change group info!")
+        return
+
+    if msg.reply_to_message:
+        if msg.reply_to_message.photo:
+            pic_id = msg.reply_to_message.photo[-1].file_id
+        elif msg.reply_to_message.document:
+            pic_id = msg.reply_to_message.document.file_id
+        else:
+            msg.reply_text("You can only set some photo as chat pic!")
+            return
+        dlmsg = msg.reply_text("Just a sec...")
+        tpic = context.bot.get_file(pic_id)
+        tpic.download("gpic.png")
+        try:
+            with open("gpic.png", "rb") as chatp:
+                context.bot.set_chat_photo(int(chat.id), photo=chatp)
+                msg.reply_text("Successfully set new chatpic!")
+        except BadRequest as excp:
+            msg.reply_text(f"Error! {excp.message}")
+        finally:
+            dlmsg.delete()
+            if os.path.isfile("gpic.png"):
+                os.remove("gpic.png")
+    else:
+        msg.reply_text("Reply to some photo or file to set new chat pic!")
+
+
+@run_async
+@bot_admin
+@user_admin
+@typing_action
+def rmchatpic(update, context):
+    chat = update.effective_chat
+    msg = update.effective_message
+    user = update.effective_user
+
+    if user_can_changeinfo(chat, user, context.bot.id) is False:
+        msg.reply_text("You don't have enough rights to delete group photo")
+        return
+    try:
+        context.bot.delete_chat_photo(int(chat.id))
+        msg.reply_text("Successfully deleted chat's profile photo!")
+    except BadRequest as excp:
+        msg.reply_text(f"Error! {excp.message}.")
+        return
+
+
+@run_async
+@bot_admin
+@user_admin
+@typing_action
+def setchat_title(update, context):
+    chat = update.effective_chat
+    msg = update.effective_message
+    user = update.effective_user
+    args = context.args
+
+    if user_can_changeinfo(chat, user, context.bot.id) is False:
+        msg.reply_text("You don't have enough rights to change chat info!")
+        return
+
+    title = " ".join(args)
+    if not title:
+        msg.reply_text("Enter some text to set new title in your chat!")
+        return
+
+    try:
+        context.bot.set_chat_title(int(chat.id), str(title))
+        msg.reply_text(
+            f"Successfully set <b>{title}</b> as new chat title!",
+            parse_mode=ParseMode.HTML,
+        )
+    except BadRequest as excp:
+        msg.reply_text(f"Error! {excp.message}.")
+        return
+
+
+@run_async
+@bot_admin
+@user_admin
+@typing_action
+def set_sticker(update, context):
+    msg = update.effective_message
+    chat = update.effective_chat
+    user = update.effective_user
+
+    if user_can_changeinfo(chat, user, context.bot.id) is False:
+        return msg.reply_text("You're missing rights to change chat info!")
+
+    if msg.reply_to_message:
+        if not msg.reply_to_message.sticker:
+            return msg.reply_text(
+                "You need to reply to some sticker to set chat sticker set!"
+            )
+        stkr = msg.reply_to_message.sticker.set_name
+        try:
+            context.bot.set_chat_sticker_set(chat.id, stkr)
+            msg.reply_text(
+                f"Successfully set new group stickers in {chat.title}!")
+        except BadRequest as excp:
+            if excp.message == "Participants_too_few":
+                return msg.reply_text(
+                    "Sorry, due to telegram restrictions chat needs to have minimum 100 members before they can have group stickers!"
+                )
+            msg.reply_text(f"Error! {excp.message}.")
+    else:
+        msg.reply_text(
+            "You need to reply to some sticker to set chat sticker set!")
+
+
+@run_async
+@bot_admin
+@user_admin
+@typing_action
+def set_desc(update, context):
+    msg = update.effective_message
+    chat = update.effective_chat
+    user = update.effective_user
+
+    if user_can_changeinfo(chat, user, context.bot.id) is False:
+        return msg.reply_text("You're missing rights to change chat info!")
+
+    tesc = msg.text.split(None, 1)
+    if len(tesc) >= 2:
+        desc = tesc[1]
+    else:
+        return msg.reply_text("Setting empty description won't do anything!")
+    try:
+        if len(desc) > 255:
+            return msg.reply_text(
+                "Description must needs to be under 255 characters!")
+        context.bot.set_chat_description(chat.id, desc)
+        msg.reply_text(
+            f"Successfully updated chat description in {chat.title}!")
+    except BadRequest as excp:
+        msg.reply_text(f"Error! {excp.message}.")
+
+
+def __chat_settings__(chat_id, user_id):
+    return "You are *admin*: `{}`".format(
+        dispatcher.bot.get_chat_member(chat_id, user_id).status
+        in ("administrator", "creator")
+    )
+
+
+@run_async
+@bot_admin
 @can_pin
 @user_admin
 @loggable
@@ -267,6 +438,10 @@ def pin(update: Update, context: CallbackContext) -> str:
 
     is_group = chat.type != "private" and chat.type != "channel"
     prev_message = update.effective_message.reply_to_message
+
+    if user_can_pin(chat, user, context.bot.id) is False:
+        message.reply_text("You are missing rights to pin a message!")
+        return ""
 
     is_silent = True
     if len(args) >= 1:
@@ -288,7 +463,7 @@ def pin(update: Update, context: CallbackContext) -> str:
                 raise
         log_message = (
             f"<b>{html.escape(chat.title)}:</b>\n"
-            f"#PINNED\n"
+            f"MESSAGE PINNED SUCCESSFULLY\n"
             f"<b>Admin:</b> {mention_html(user.id, html.escape(user.first_name))}"
         )
 
@@ -315,7 +490,7 @@ def unpin(update: Update, context: CallbackContext) -> str:
 
     log_message = (
         f"<b>{html.escape(chat.title)}:</b>\n"
-        f"#UNPINNED\n"
+        f"MESSAGE UNPINNED SUCCESSFULLY\n"
         f"<b>Admin:</b> {mention_html(user.id, html.escape(user.first_name))}"
     )
 
@@ -332,7 +507,7 @@ def invite(update: Update, context: CallbackContext):
 
     if chat.username:
         update.effective_message.reply_text(f"https://t.me/{chat.username}")
-    elif chat.type == chat.SUPERGROUP or chat.type == chat.CHANNEL:
+    elif chat.type in [chat.SUPERGROUP, chat.CHANNEL]:
         bot_member = chat.get_member(bot.id)
         if bot_member.can_invite_users:
             invitelink = bot.exportChatInviteLink(chat.id)
@@ -352,16 +527,16 @@ def invite(update: Update, context: CallbackContext):
 def adminlist(update, context):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
-    context.args
+    args = context.args
     bot = context.bot
 
     if update.effective_message.chat.type == "private":
         send_message(update.effective_message, "This command only works in Groups.")
         return
 
-    update.effective_chat
+    chat = update.effective_chat
     chat_id = update.effective_chat.id
-    update.effective_message.chat.title
+    chat_name = update.effective_message.chat.title
 
     try:
         msg = update.effective_message.reply_text(
@@ -445,9 +620,9 @@ def adminlist(update, context):
             custom_admin_list.pop(admin_group)
 
     text += "\n"
-    for admin_group in custom_admin_list:
+    for admin_group, value in custom_admin_list.items():
         text += "\n🚨 <code>{}</code>".format(admin_group)
-        for admin in custom_admin_list[admin_group]:
+        for admin in value:
             text += "\n<code> • </code>{}".format(admin)
         text += "\n"
 
@@ -462,17 +637,30 @@ def adminlist(update, context):
 
 
 __help__ = """
- ✪ /admins*:* list of admins in the chat
+ ❍ /admins*:* list of admins in the chat
 
 *Admins only:*
- ✪ /pin*:* silently pins the message replied to - add `'loud'` or `'notify'` to give notifs to users
- ✪ /unpin*:* unpins the currently pinned message
- ✪ /invitelink*:* gets invitelink
- ✪ /promote*:* promotes the user replied to
- ✪ /demote*:* demotes the user replied to
- ✪ /title <title here>*:* sets a custom title for an admin that the bot promoted
- ✪ /admincache*:* force refresh the admins list
- ✪ /zombies*:* scan and clean zombies
+ ❍ /pin*:* silently pins the message replied to - add `'loud'` or `'notify'` to give notifs to users
+ ❍ /unpin*:* unpins the currently pinned message
+ ❍ /invitelink*:* gets invitelink
+ ❍ /promote*:* promotes the user
+ ❍ /demote*:* demotes the user
+ ❍ /title <title here>*:* sets a custom title for an admin that the bot promoted
+ ❍ /setgtitle <newtitle>*:* Sets new chat title in your group.
+ ❍ /setgpic*:* As a reply to file or photo to set group profile pic!
+ ❍ /delgpic*:* Same as above but to remove group profile pic.
+ ❍ /setsticker*:* As a reply to some sticker to set it as group sticker set!
+ ❍ /setdescription <description>*:* Sets new chat description in group.
+ ❍ /admincache*:* force refresh the admins list
+ ❍ /antispam <on/off/yes/no>*:* Will toggle our antispam tech or return your current settings.
+ ❍ /del*:* deletes the message you replied to
+ ❍ /purge*:* deletes all messages between this and the replied to message.
+ ❍ /purge <integer X>*:* deletes the replied message, and X messages following it if replied to a message.
+
+*Note:* Night Mode chats get Automatically closed at 12 am(IST)
+and Automatically openned at 6 am(IST) To Prevent Night Spams.
+
+⚠️ `Read from top`
 """
 
 ADMINLIST_HANDLER = DisableAbleCommandHandler("admins", adminlist)
@@ -490,6 +678,19 @@ ADMIN_REFRESH_HANDLER = CommandHandler(
     "admincache", refresh_admin, filters=Filters.group
 )
 
+CHAT_PIC_HANDLER = CommandHandler("setgpic", setchatpic, filters=Filters.group)
+DEL_CHAT_PIC_HANDLER = CommandHandler(
+    "delgpic", rmchatpic, filters=Filters.group)
+SETCHAT_TITLE_HANDLER = CommandHandler(
+    "setgtitle", setchat_title, filters=Filters.group
+)
+SETSTICKET_HANDLER = CommandHandler(
+    "setsticker", set_sticker, filters=Filters.group)
+SETDESC_HANDLER = CommandHandler(
+    "setdescription",
+    set_desc,
+    filters=Filters.group)
+
 dispatcher.add_handler(ADMINLIST_HANDLER)
 dispatcher.add_handler(PIN_HANDLER)
 dispatcher.add_handler(UNPIN_HANDLER)
@@ -498,8 +699,13 @@ dispatcher.add_handler(PROMOTE_HANDLER)
 dispatcher.add_handler(DEMOTE_HANDLER)
 dispatcher.add_handler(SET_TITLE_HANDLER)
 dispatcher.add_handler(ADMIN_REFRESH_HANDLER)
+dispatcher.add_handler(CHAT_PIC_HANDLER)
+dispatcher.add_handler(DEL_CHAT_PIC_HANDLER)
+dispatcher.add_handler(SETCHAT_TITLE_HANDLER)
+dispatcher.add_handler(SETSTICKET_HANDLER)
+dispatcher.add_handler(SETDESC_HANDLER)
 
-__mod_name__ = "Admin 🎖"
+__mod_name__ = "Admin"
 __command_list__ = [
     "adminlist",
     "admins",
