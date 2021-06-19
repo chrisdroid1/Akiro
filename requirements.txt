@@ -9,6 +9,7 @@ emoji
 lxml
 beautifulsoup4
 requests
+telegraph
 dnspython
 sqlalchemy==1.3.23
 python-telegram-bot==12.8
