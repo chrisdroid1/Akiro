@@ -40,4 +40,4 @@ NEKO_HANDLER = DisableAbleCommandHandler("neko", neko)
 dispatcher.add_handler(PASTE_HANDLER)
 
 __command_list__ = ["neko"]
-__handlers__ = [PASTE_HANDLER]
+__handlers__ = [NEKO_HANDLER]
