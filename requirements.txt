@@ -23,6 +23,7 @@ geopy
 nltk
 psutil
 aiohttp>=2.2.5
+dateparser==1.0.0
 Pillow>=4.2.0
 CurrencyConverter
 googletrans==3.1.0a0
