@@ -112,3 +112,10 @@ Obtained By Akiro.</b>
     )
     
     await event.delete()
+
+__mod_name__ = "◎Country"
+
+__help__ = """
+*Countryinfo*
+❍ /country : get infos about about a country
+"""
