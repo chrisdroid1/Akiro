@@ -75,14 +75,5 @@ fake-useragent
 asyncio
 pymongo[srv]
 
-gtts
-apscheduler
 emoji-country-flag
 countryinfo
-html2text
-bs4
-bing_image_downloader
-pytz
-lyricsgenius
-tswift
-
