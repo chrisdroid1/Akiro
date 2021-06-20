@@ -1,15 +1,19 @@
-import html
-import random
+import random, html
 
+from DaisyX import dispatcher
+from DaisyX.modules.disable import (
+    DisableAbleCommandHandler,
+    DisableAbleMessageHandler,
+)
+from DaisyX.modules.sql import afk_sql as sql
+from DaisyX.modules.users import get_user_id
 from telegram import MessageEntity, Update
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext, Filters, MessageHandler, run_async
 
-from DaisyX import dispatcher
-from DaisyX.modules.disable import DisableAbleCommandHandler, DisableAbleMessageHandler
-from DaisyX.modules.sql import afk_sql as sql
-from DaisyX.modules.users import get_user_id
-
+AFK_VID = "https://telegra.ph/file/47d3aca81e02ff5c07a97.mp4"
+USER_BACK = "https://telegra.ph/file/ba032f0f461723ee24dde.mp4"
+AFK_REASON_VID = "https://telegra.ph/file/d56d712ced752433fdde0.mp4"
 AFK_GROUP = 7
 AFK_REPLY_GROUP = 8
 
@@ -37,7 +41,13 @@ def afk(update: Update, context: CallbackContext):
     sql.set_afk(update.effective_user.id, reason)
     fname = update.effective_user.first_name
     try:
-        update.effective_message.reply_text("{} is now away!{}".format(fname, notice))
+        afk = [
+                "{} is now AFK!",
+                "bye bye, {}!",
+                "{} is now away!",
+        ]
+        chosen_msg = random.choice(afk)
+        update.effective_message.reply_animation(AFK_VID, caption=chosen_msg.format(fname))
     except BadRequest:
         pass
 
@@ -57,17 +67,15 @@ def no_longer_afk(update: Update, context: CallbackContext):
         firstname = update.effective_user.first_name
         try:
             options = [
-                "{} is here!",
                 "{} is back!",
-                "{} is now in the chat!",
-                "{} is awake!",
-                "{} is back online!",
+                "welcome back {}!",
+                "Yo, {} is here!",
+                "{} is online!",
                 "{} is finally here!",
                 "Welcome back! {}",
-                "Where is {}?\nIn the chat!",
             ]
             chosen_option = random.choice(options)
-            update.effective_message.reply_text(chosen_option.format(firstname))
+            update.effective_message.reply_animation(USER_BACK, caption=chosen_option.format(firstname))
         except:
             return
 
@@ -95,31 +103,24 @@ def reply_afk(update: Update, context: CallbackContext):
                     return
                 chk_users.append(user_id)
 
-            if ent.type == MessageEntity.MENTION:
-                user_id = get_user_id(
-                    message.text[ent.offset : ent.offset + ent.length]
-                )
-                if not user_id:
-                    # Should never happen, since for a user to become AFK they must have spoken. Maybe changed username?
-                    return
-
-                if user_id in chk_users:
-                    return
-                chk_users.append(user_id)
-
-                try:
-                    chat = bot.get_chat(user_id)
-                except BadRequest:
-                    print(
-                        "Error: Could not fetch userid {} for AFK module".format(
-                            user_id
-                        )
-                    )
-                    return
-                fst_name = chat.first_name
-
-            else:
+            if ent.type != MessageEntity.MENTION:
                 return
+
+            user_id = get_user_id(message.text[ent.offset : ent.offset + ent.length])
+            if not user_id:
+                # Should never happen, since for a user to become AFK they must have spoken. Maybe changed username?
+                return
+
+            if user_id in chk_users:
+                return
+            chk_users.append(user_id)
+
+            try:
+                chat = bot.get_chat(user_id)
+            except BadRequest:
+                print("Error: Could not fetch userid {} for AFK module".format(user_id))
+                return
+            fst_name = chat.first_name
 
             check_afk(update, context, user_id, fst_name, userc_id)
 
@@ -132,25 +133,18 @@ def reply_afk(update: Update, context: CallbackContext):
 def check_afk(update, context, user_id, fst_name, userc_id):
     if sql.is_afk(user_id):
         user = sql.check_afk_status(user_id)
+        if int(userc_id) == int(user_id):
+            return
         if not user.reason:
-            if int(userc_id) == int(user_id):
-                return
             res = "{} is afk".format(fst_name)
-            update.effective_message.reply_text(res)
+            update.effective_message.reply_animation(AFK_REASON_VID, caption=html.escape(user.reason))
         else:
-            if int(userc_id) == int(user_id):
-                return
             res = "{} is afk.\nReason: <code>{}</code>".format(
                 html.escape(fst_name), html.escape(user.reason)
             )
-            update.effective_message.reply_text(res, parse_mode="html")
+            update.effective_message.reply_animation(AFK_REASON_VID, caption=html.escape(user.reason))
 
 
-__help__ = """
- • `/afk <reason>`*:* mark yourself as AFK(away from keyboard).
- • `brb <reason>`*:* same as the afk command - but not a command.
-When marked as AFK, any mentions will be replied to with a message to say you're not available!
-"""
 
 AFK_HANDLER = DisableAbleCommandHandler("afk", afk)
 AFK_REGEX_HANDLER = DisableAbleMessageHandler(
@@ -164,7 +158,7 @@ dispatcher.add_handler(AFK_REGEX_HANDLER, AFK_GROUP)
 dispatcher.add_handler(NO_AFK_HANDLER, AFK_GROUP)
 dispatcher.add_handler(AFK_REPLY_HANDLER, AFK_REPLY_GROUP)
 
-__mod_name__ = "AFK 🏃‍♀️"
+__mod_name__ = "AFK🏃"
 __command_list__ = ["afk"]
 __handlers__ = [
     (AFK_HANDLER, AFK_GROUP),
