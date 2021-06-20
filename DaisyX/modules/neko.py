@@ -37,7 +37,7 @@ def neko(update: Update, context: CallbackContext):
 
 
 NEKO_HANDLER = DisableAbleCommandHandler("neko", neko)
-dispatcher.add_handler(PASTE_HANDLER)
+dispatcher.add_handler(NEKO_HANDLER)
 
 __command_list__ = ["neko"]
 __handlers__ = [NEKO_HANDLER]
