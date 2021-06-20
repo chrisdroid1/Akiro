@@ -6,7 +6,7 @@ from telegram.ext import CallbackContext, run_async
 
 
 @run_async
-def neko(update: Update, context: CallbackContext):
+def paste(update: Update, context: CallbackContext):
     args = context.args
     message = update.effective_message
 
@@ -36,8 +36,8 @@ def neko(update: Update, context: CallbackContext):
     )
 
 
-NEKO_HANDLER = DisableAbleCommandHandler("neko", neko)
-dispatcher.add_handler(NEKO_HANDLER)
+PASTE_HANDLER = DisableAbleCommandHandler("paste", paste)
+dispatcher.add_handler(PASTE_HANDLER)
 
-__command_list__ = ["neko"]
-__handlers__ = [NEKO_HANDLER]
+__command_list__ = ["paste"]
+__handlers__ = [PASTE_HANDLER]
