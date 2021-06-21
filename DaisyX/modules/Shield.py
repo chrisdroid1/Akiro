@@ -10,9 +10,9 @@ from better_profanity import profanity
 from google_trans_new import google_translator
 from telethon import events
 from telethon.tl.types import ChatBannedRights
-from DaisyX.conf import get_int_key, get_str_key
+
 from DaisyX import BOT_ID
- 
+from DaisyX.conf import get_int_key, get_str_key
 
 # from DaisyX.db.mongo_helpers.nsfw_guard import add_chat, get_all_nsfw_chats, is_chat_in_db, rm_chat
 from DaisyX.pyrogramee.telethonbasics import is_admin
@@ -34,7 +34,7 @@ MONGO_DB_URI = get_str_key("MONGO_DB_URI")
 
 client = MongoClient()
 client = MongoClient(MONGO_DB_URI)
-db = client["MashaRoBot"]
+db = client["yonerobot"]
 
 async def is_nsfw(event):
     lmao = event
@@ -353,7 +353,7 @@ async def del_profanity(event):
                     await event.delete()
                     st = sender.first_name
                     hh = sender.id
-                    final = f"**NSFW DETECTED**\n\n{st}](tg://user?id={hh}) your message contain NSFW content.. So, Yone deleted the message\n\n **Nsfw Sender - User / Bot :** {st}](tg://user?id={hh})  \n\n`⚔️Automatic Detections Powered By Lovish` \n**#GROUP_GUARDIAN** "
+                    final = f"**NSFW DETECTED**\n\n{st}](tg://user?id={hh}) your message contain NSFW content.. So, Yone deleted the message\n\n **Nsfw Sender - User / Bot :** {st}](tg://user?id={hh})  \n\n`⚔️Automatic Detections Powered By YoneAI` \n**#GROUP_GUARDIAN** "
                     dev = await event.respond(final)
                     await asyncio.sleep(10)
                     await dev.delete()
@@ -412,17 +412,18 @@ async def del_profanity(event):
                     dev = await event.respond(final)
                     await asyncio.sleep(10)
                     await dev.delete()
-
+#
 
 __help__ = """
-<b> Group Guardian: </b>
-✪ Yone can protect your group from NSFW senders, Slag word users and also can force members to use English
-<b>Commmands</b>
- - /gshield <i>on/off</i> - Enable|Disable Porn cleaning
- - /globalmode <i>on/off</i> - Enable|Disable English only mode
- - /profanity <i>on/off</i> - Enable|Disable slag word cleaning
  
-Note: Special credits goes to Julia project and Friday Userbot
+*Group Guardian:*
+𝐓𝐈𝐓𝐀𝐍 𝟐.𝟎 cαη ρяσтєcт уσυя gяσυρ ƒяσм ɴꜱꜰᴡ ѕєη∂єяѕ, ѕℓαg ωσя∂ υѕєяѕ αη∂ αℓѕσ cαη ƒσя¢є мємвєяѕ тσ υѕє єηgℓιѕн
+*Commmands*
+ ✮ /gshield `on/off` - Enable|Disable Porn cleaning
+ ✮ /globalmode `on/off` - Enable|Disable English only mode
+ ✮ /profanity `on/off` - Enable|Disable slag word cleaning
+ 
+`Note: ꜱᴘᴇᴄɪᴀʟ ᴄʀᴇᴅɪᴛꜱ ɢᴏᴇꜱ ᴛᴏ ᴊᴜʟɪᴀ ᴘʀᴏᴊᴇᴄᴛ ᴀɴᴅ ꜰʀɪᴅᴀʏ ᴜꜱᴇʀʙᴏᴛ`
  
 """
-__mod_name__ = "PROTECT"
+__mod_name__ = "Sʜɪᴇʟᴅ🛡️"
