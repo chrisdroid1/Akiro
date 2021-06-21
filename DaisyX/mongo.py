@@ -1,4 +1,5 @@
 import asyncio
+import loguru
 import sys
 
 from motor import motor_asyncio
