@@ -1,4 +1,5 @@
 future
+loguru
 datetime
 secureme
 heroku3
