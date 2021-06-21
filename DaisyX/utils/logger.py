@@ -40,7 +40,7 @@ class InterceptHandler(logging.Handler):
 logging.basicConfig(handlers=[InterceptHandler()], level=logging.INFO)
 log = logging.getLogger(__name__)
 logger.add(
-    "logs/daisy.log",
+    "logs/DaisyX.log",
     rotation="1 d",
     compression="tar.xz",
     backtrace=True,
