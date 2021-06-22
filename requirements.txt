@@ -28,7 +28,6 @@ dateparser==1.0.0
 Pillow>=4.2.0
 CurrencyConverter
 googletrans==3.1.0a0
-pathlib
 jikanpy
 speedtest-cli
 coffeehouse
