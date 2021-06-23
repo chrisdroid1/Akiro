@@ -70,13 +70,6 @@ async def delete_messages(event):
     del_message = [message, event.message]
     await event.client.delete_messages(chat, del_message)
 
-from DaisyX.modules.language import gs
-
-def get_help(chat):
-    return gs(chat, "purge_help")
-
-
-
 
 PURGE_HANDLER = purge_messages, events.NewMessage(pattern="^[!/]purge$")
 DEL_HANDLER = delete_messages, events.NewMessage(pattern="^[!/]del$")
