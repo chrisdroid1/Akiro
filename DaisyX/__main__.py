@@ -227,7 +227,6 @@ def start(update: Update, context: CallbackContext):
              parse_mode=ParseMode.MARKDOWN,
          )
 
-             )
 
 def error_handler(update, context):
     """Log the error and send a telegram message to notify the developer."""
