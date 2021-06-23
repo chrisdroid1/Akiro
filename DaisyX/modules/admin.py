@@ -1,5 +1,4 @@
 import html
-import os
 
 from telegram import ParseMode, Update
 from telegram.error import BadRequest
@@ -16,7 +15,7 @@ from DaisyX.modules.helper_funcs.chat_status import (
     user_admin,
     ADMIN_CACHE,
 )
-from DaisyX.modules.helper_funcs.admin_rights import (
+from DaisyX.helper_extra.admin_rights import (
     user_can_pin,
     user_can_promote,
     user_can_changeinfo,
