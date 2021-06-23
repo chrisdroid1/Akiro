@@ -223,10 +223,7 @@ def start(update: Update, context: CallbackContext):
     else:
         update.effective_message.reply_text(
             "Your group was registered in the bot,you can enjoy its features🌹\n Support Group: https://t.me/kaelagrpsupport\n Please refer to the bot @Akirogrpbot for commands or send /help"
-
-             ),
-             parse_mode=ParseMode.MARKDOWN,
-         )
+             )
 
 
 def error_handler(update, context):
